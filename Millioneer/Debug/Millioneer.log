@@ -1,2 +1,7 @@
 ﻿  Source.cpp
+D:\Репризитории\Millioneer\Source.cpp(118,20): warning C4018:  <=: несоответствие типов со знаком и без знака
+D:\Репризитории\Millioneer\Source.cpp(204,11): warning C4018:  <=: несоответствие типов со знаком и без знака
+D:\Репризитории\Millioneer\Source.cpp(442,12): warning C4244:  аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
+D:\Репризитории\Millioneer\Source.cpp(445,20): warning C4018:  <=: несоответствие типов со знаком и без знака
+D:\Репризитории\Millioneer\Source.cpp(123): warning C4715:  check_key: значение возвращается не при всех путях выполнения
   Millioneer.vcxproj -> D:\Репризитории\Millioneer\Debug\Millioneer.exe

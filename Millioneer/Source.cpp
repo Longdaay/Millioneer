@@ -1,15 +1,19 @@
 //Курсовая работа - "Кто хочет стать миллионером"
+
+
 #include <iostream> //нужен для вывода строк "cout<<"
 #include <fstream>
 #include <string>
 #include "windows.h" //библиотека audiere её требует
-#include "audiere.h" //сама библиотека
 #include <iostream>
 #include <vector>
 #include <fstream>
 #include <ctime>
 #include <conio.h> // для меню (считывание символов напрямую из консоли без использования буфера и echo-вывода (getch(void))
 #include <iomanip>
+
+#include "audiere.h" //сама библиотека
+#pragma comment(lib, "audiere.lib")
 
 using namespace std;
 using namespace audiere; //определяем пространства имён для более короткой записи кода
@@ -19,6 +23,8 @@ bool fl_half = FALSE; // 50 на 50
 bool fl_phone = FALSE; // помощь друга
 bool fl_friends = FALSE; // помощь зала
 int cur_prize = 0;
+AudioDevicePtr device = OpenDevice(); //Для начала нужно открыть AudioDevice
+OutputStreamPtr sound = OpenSound(device, "intro.mp3", false); //открываем наш звук
 
 void print_dib(const vector<string>& prizes);
 
@@ -141,60 +147,85 @@ void print_half_answer(const Phase& ques, int list)
 	cout << "\t -------------------------" << "               " << "------------------------ " << endl;
 	
 	if (ques.question[list].answer[0].length() <= 5)
-	{
-		half_answers(ques, key, temp, 0, list); cout << "\t A" << ": " << ques.question[list].answer[0]; SetColor(7, 0); cout << "     \t\t\t\t"; half_answers(ques, key, temp, 1, list); cout << " B" << ": " << ques.question[list].answer[1]; SetColor(7, 0); cout << endl;
-	}
+	{half_answers(ques, key, temp, 0, list); cout << "\t A" << ": " << ques.question[list].answer[0]; SetColor(7, 0); cout << "     \t\t\t\t"; half_answers(ques, key, temp, 1, list); cout << " B" << ": " << ques.question[list].answer[1]; SetColor(7, 0); cout << endl;}
 	if (ques.question[list].answer[0].length() > 5 and ques.question[list].answer[0].length() <= 10)
-	{
-		half_answers(ques, key, temp, 0, list); cout << "\t A" << ": " << ques.question[list].answer[0]; SetColor(7, 0); cout << "        \t\t\t"; half_answers(ques, key, temp, 1, list); cout << " B" << ": " << ques.question[list].answer[1]; SetColor(7, 0); cout << endl;
-	}
+	{half_answers(ques, key, temp, 0, list); cout << "\t A" << ": " << ques.question[list].answer[0]; SetColor(7, 0); cout << "        \t\t\t"; half_answers(ques, key, temp, 1, list); cout << " B" << ": " << ques.question[list].answer[1]; SetColor(7, 0); cout << endl;}
 	if (ques.question[list].answer[0].length() > 10 and ques.question[list].answer[0].length() != 14 and ques.question[list].answer[0].length() < 15)
-	{
-		half_answers(ques, key, temp, 0, list); cout << "\t A" << ": " << ques.question[list].answer[0]; SetColor(7, 0); cout << "      \t\t\t"; half_answers(ques, key, temp, 1, list); cout << " B" << ": " << ques.question[list].answer[1]; SetColor(7, 0); cout << endl;
-	}
+	{half_answers(ques, key, temp, 0, list); cout << "\t A" << ": " << ques.question[list].answer[0]; SetColor(7, 0); cout << "      \t\t\t"; half_answers(ques, key, temp, 1, list); cout << " B" << ": " << ques.question[list].answer[1]; SetColor(7, 0); cout << endl;}
 	if (ques.question[list].answer[0].length() == 14)
-	{
-		half_answers(ques, key, temp, 0, list); cout << "\t A" << ": " << ques.question[list].answer[0]; SetColor(7, 0); cout << "      \t\t"; half_answers(ques, key, temp, 1, list); cout << " B" << ": " << ques.question[list].answer[1]; SetColor(7, 0); cout << endl;
-	}
+	{half_answers(ques, key, temp, 0, list); cout << "\t A" << ": " << ques.question[list].answer[0]; SetColor(7, 0); cout << "      \t\t"; half_answers(ques, key, temp, 1, list); cout << " B" << ": " << ques.question[list].answer[1]; SetColor(7, 0); cout << endl;}
 	if (ques.question[list].answer[0].length() >= 15 and ques.question[list].answer[0].length() < 20)
-	{
-		half_answers(ques, key, temp, 0, list); cout << "\t A" << ": " << ques.question[list].answer[0]; SetColor(7, 0); cout << "        \t\t"; half_answers(ques, key, temp, 1, list); cout << " B" << ": " << ques.question[list].answer[1]; SetColor(7, 0); cout << endl;
-	}
+	{half_answers(ques, key, temp, 0, list); cout << "\t A" << ": " << ques.question[list].answer[0]; SetColor(7, 0); cout << "        \t\t"; half_answers(ques, key, temp, 1, list); cout << " B" << ": " << ques.question[list].answer[1]; SetColor(7, 0); cout << endl;}
 	if (ques.question[list].answer[0].length() >= 20)
-	{
-		half_answers(ques, key, temp, 0, list); cout << "\t A" << ": " << ques.question[list].answer[0]; SetColor(7, 0); cout << "        \t"; half_answers(ques, key, temp, 1, list); cout << " B" << ": " << ques.question[list].answer[1]; SetColor(7, 0); cout << endl;
-	}
+	{half_answers(ques, key, temp, 0, list); cout << "\t A" << ": " << ques.question[list].answer[0]; SetColor(7, 0); cout << "        \t"; half_answers(ques, key, temp, 1, list); cout << " B" << ": " << ques.question[list].answer[1]; SetColor(7, 0); cout << endl;}
 	cout << "\t -------------------------" << "               " << "------------------------ " << endl << endl;
 	cout << "\t -------------------------" << "               " << "------------------------ " << endl;
 	if (ques.question[list].answer[2].length() <= 5)
-	{
-		half_answers(ques, key, temp, 2, list); cout << "\t C" << ": " << ques.question[list].answer[2]; SetColor(7, 0); cout << "     \t\t\t\t"; half_answers(ques, key, temp, 3, list); cout << " D" << ": " << ques.question[list].answer[3]; SetColor(7, 0); cout << endl;
-	}
+	{half_answers(ques, key, temp, 2, list); cout << "\t C" << ": " << ques.question[list].answer[2]; SetColor(7, 0); cout << "     \t\t\t\t"; half_answers(ques, key, temp, 3, list); cout << " D" << ": " << ques.question[list].answer[3]; SetColor(7, 0); cout << endl;}
 	if (ques.question[list].answer[2].length() > 5 and ques.question[list].answer[2].length() <= 10)
-	{
-		half_answers(ques, key, temp, 2, list); cout << "\t C" << ": " << ques.question[list].answer[2]; SetColor(7, 0); cout << "        \t\t\t"; half_answers(ques, key, temp, 3, list); cout << " D" << ": " << ques.question[list].answer[3]; SetColor(7, 0); cout << endl;
-	}
+	{half_answers(ques, key, temp, 2, list); cout << "\t C" << ": " << ques.question[list].answer[2]; SetColor(7, 0); cout << "        \t\t\t"; half_answers(ques, key, temp, 3, list); cout << " D" << ": " << ques.question[list].answer[3]; SetColor(7, 0); cout << endl;}
 	if (ques.question[list].answer[2].length() > 10 and ques.question[list].answer[2].length() != 14 and ques.question[list].answer[2].length() < 15)
-	{
-		half_answers(ques, key, temp, 2, list); cout << "\t C" << ": " << ques.question[list].answer[2]; SetColor(7, 0); cout << "      \t\t\t"; half_answers(ques, key, temp, 3, list); cout << " D" << ": " << ques.question[list].answer[3]; SetColor(7, 0); cout << endl;
-	}
+	{half_answers(ques, key, temp, 2, list); cout << "\t C" << ": " << ques.question[list].answer[2]; SetColor(7, 0); cout << "      \t\t\t"; half_answers(ques, key, temp, 3, list); cout << " D" << ": " << ques.question[list].answer[3]; SetColor(7, 0); cout << endl;}
 	if (ques.question[list].answer[2].length() == 14)
-	{
-		half_answers(ques, key, temp, 2, list); cout << "\t C" << ": " << ques.question[list].answer[2]; SetColor(7, 0); cout << "      \t\t"; half_answers(ques, key, temp, 3, list); cout << " D" << ": " << ques.question[list].answer[3]; SetColor(7, 0); cout << endl;
-	}
+	{half_answers(ques, key, temp, 2, list); cout << "\t C" << ": " << ques.question[list].answer[2]; SetColor(7, 0); cout << "      \t\t"; half_answers(ques, key, temp, 3, list); cout << " D" << ": " << ques.question[list].answer[3]; SetColor(7, 0); cout << endl;}
 	if (ques.question[list].answer[2].length() >= 15 and ques.question[list].answer[2].length() < 20)
-	{
-		half_answers(ques, key, temp, 2, list); cout << "\t C" << ": " << ques.question[list].answer[2]; SetColor(7, 0); cout << "        \t\t"; half_answers(ques, key, temp, 3, list); cout << " D" << ": " << ques.question[list].answer[3]; SetColor(7, 0); cout << endl;
-	}
+	{half_answers(ques, key, temp, 2, list); cout << "\t C" << ": " << ques.question[list].answer[2]; SetColor(7, 0); cout << "        \t\t"; half_answers(ques, key, temp, 3, list); cout << " D" << ": " << ques.question[list].answer[3]; SetColor(7, 0); cout << endl;}
 	if (ques.question[list].answer[2].length() >= 20)
-	{
-		half_answers(ques, key, temp, 2, list); cout << "\t C" << ": " << ques.question[list].answer[2]; SetColor(7, 0); cout << "        \t"; half_answers(ques, key, temp, 3, list); cout << " D" << ": " << ques.question[list].answer[3]; SetColor(7, 0); cout << endl;
-	}
+	{half_answers(ques, key, temp, 2, list); cout << "\t C" << ": " << ques.question[list].answer[2]; SetColor(7, 0); cout << "        \t"; half_answers(ques, key, temp, 3, list); cout << " D" << ": " << ques.question[list].answer[3]; SetColor(7, 0); cout << endl;}
 	cout << "\t -------------------------" << "               " << "------------------------ " << endl;
 }
 
-void print_conf_question(const Phase& easy)
+void print_conf_color(const Phase& ques, int list, int current_conf, int current_value, bool flag)
 {
+	if (flag)
+	{
+		if (ques.question[list].answer[current_value] == ques.question[list].key)
+			SetColor(10, 0);
+	}
+	else
+	{
+		if (current_value == current_conf)
+			SetColor(6, 0);
+	}
+}
+
+void print_conf_question(const Phase& ques, const vector <string>& prizes, int list, int current_conf, bool flag)
+{
+
+	system("cls");
+	print_dib(prizes);
+	cout << " -------------------------------------------------------------------------------------------------------" << endl;
+	cout << "\t" << ques.question[list].question << "" << endl;
+	cout << " -------------------------------------------------------------------------------------------------------" << endl;
+	print_conf_color(ques, list, current_conf, 0, flag); cout << "\t -------------------------"; SetColor(7, 0); cout << "               "; print_conf_color(ques, list, current_conf, 1, flag); cout << "------------------------ "; SetColor(7, 0); cout << endl;
+
+	if (ques.question[list].answer[0].length() <= 5)
+	{print_conf_color(ques, list, current_conf, 0, flag); cout << "\t A" << ": " << ques.question[list].answer[0];  SetColor(7, 0); cout << "     \t\t\t\t"; print_conf_color(ques, list, current_conf, 1, flag); cout << " B" << ": " << ques.question[list].answer[1]; SetColor(7, 0); cout << endl;}
+	if (ques.question[list].answer[0].length() > 5 and ques.question[list].answer[0].length() <= 10)
+	{print_conf_color(ques, list, current_conf, 0, flag); cout << "\t A" << ": " << ques.question[list].answer[0]; SetColor(7, 0); cout << "        \t\t\t"; print_conf_color(ques, list, current_conf, 1, flag); cout << " B" << ": " << ques.question[list].answer[1]; SetColor(7, 0); cout << endl;}
+	if (ques.question[list].answer[0].length() > 10 and ques.question[list].answer[0].length() != 14 and ques.question[list].answer[0].length() < 15)
+	{print_conf_color(ques, list, current_conf, 0, flag); cout << "\t A" << ": " << ques.question[list].answer[0]; SetColor(7, 0); cout << "      \t\t\t"; print_conf_color(ques, list, current_conf, 1, flag); cout << " B" << ": " << ques.question[list].answer[1]; SetColor(7, 0); cout << endl;}
+	if (ques.question[list].answer[0].length() == 14)
+	{print_conf_color(ques, list, current_conf, 0, flag); cout << "\t A" << ": " << ques.question[list].answer[0]; SetColor(7, 0); cout << "      \t\t"; print_conf_color(ques, list, current_conf, 1, flag); cout << " B" << ": " << ques.question[list].answer[1]; SetColor(7, 0); cout << endl;}
+	if (ques.question[list].answer[0].length() >= 15 and ques.question[list].answer[0].length() < 20)
+	{print_conf_color(ques, list, current_conf, 0, flag); cout << "\t A" << ": " << ques.question[list].answer[0]; cout << "        \t\t"; print_conf_color(ques, list, current_conf, 1, flag); cout << " B" << ": " << ques.question[list].answer[1]; SetColor(7, 0); cout << endl;}
+	if (ques.question[list].answer[0].length() >= 20)
+	{print_conf_color(ques, list, current_conf, 0, flag); cout << "\t A" << ": " << ques.question[list].answer[0]; SetColor(7, 0); cout << "        \t"; print_conf_color(ques, list, current_conf, 1, flag); cout << " B" << ": " << ques.question[list].answer[1]; SetColor(7, 0); cout << endl;}
+	print_conf_color(ques, list, current_conf, 0, flag); cout << "\t -------------------------"; SetColor(7, 0); cout << "               "; print_conf_color(ques, list, current_conf, 1, flag); cout << "------------------------ "; SetColor(7, 0); cout << endl << endl;
+	print_conf_color(ques, list, current_conf, 2, flag); cout << "\t -------------------------"; SetColor(7, 0); cout << "               "; print_conf_color(ques, list, current_conf, 3, flag); cout << "------------------------ "; SetColor(7, 0); cout << endl;
+	if (ques.question[list].answer[2].length() <= 5)
+	{print_conf_color(ques, list, current_conf, 2, flag); cout << "\t C" << ": " << ques.question[list].answer[2]; SetColor(7, 0); cout << "     \t\t\t\t"; print_conf_color(ques, list, current_conf, 3, flag); cout << " D" << ": " << ques.question[list].answer[3]; SetColor(7, 0); cout << endl;}
+	if (ques.question[list].answer[2].length() > 5 and ques.question[list].answer[2].length() <= 10)
+	{print_conf_color(ques, list, current_conf, 2, flag); cout << "\t C" << ": " << ques.question[list].answer[2]; SetColor(7, 0); cout << "        \t\t\t"; print_conf_color(ques, list, current_conf, 3, flag); cout << " D" << ": " << ques.question[list].answer[3]; SetColor(7, 0); cout << endl;}
+	if (ques.question[list].answer[2].length() > 10 and ques.question[list].answer[2].length() != 14 and ques.question[list].answer[2].length() < 15)
+	{print_conf_color(ques, list, current_conf, 2, flag); cout << "\t C" << ": " << ques.question[list].answer[2]; SetColor(7, 0); cout << "      \t\t\t"; print_conf_color(ques, list, current_conf, 3, flag); cout << " D" << ": " << ques.question[list].answer[3]; SetColor(7, 0); cout << endl;}
+	if (ques.question[list].answer[2].length() == 14)
+	{print_conf_color(ques, list, current_conf, 2, flag); cout << "\t C" << ": " << ques.question[list].answer[2]; SetColor(7, 0); cout << "      \t\t"; print_conf_color(ques, list, current_conf, 3, flag); cout << " D" << ": " << ques.question[list].answer[3]; SetColor(7, 0); cout << endl;}
+	if (ques.question[list].answer[2].length() >= 15 and ques.question[list].answer[2].length() < 20)
+	{print_conf_color(ques, list, current_conf, 2, flag); cout << "\t C" << ": " << ques.question[list].answer[2]; SetColor(7, 0); cout << "        \t\t"; print_conf_color(ques, list, current_conf, 3, flag); cout << " D" << ": " << ques.question[list].answer[3]; SetColor(7, 0); cout << endl;}
+	if (ques.question[list].answer[2].length() >= 20)
+	{print_conf_color(ques, list, current_conf, 2, flag); cout << "\t C" << ": " << ques.question[list].answer[2]; SetColor(7, 0); cout << "        \t"; print_conf_color(ques, list, current_conf, 3, flag); cout << " D" << ": " << ques.question[list].answer[3]; SetColor(7, 0); cout << endl;}
+	print_conf_color(ques, list, current_conf, 2, flag); cout << "\t -------------------------"; SetColor(7, 0); cout << "               "; print_conf_color(ques, list, current_conf, 3, flag); cout << "------------------------ "; SetColor(7, 0); cout << endl;
 
 }
 
@@ -210,7 +241,11 @@ void print_questions(const Phase& easy)
 
 void end_game()
 {
+	sound->stop();
+	sound = OpenSound(device, "wrong.mp3", false); //открываем наш звук
+	sound->play();
 	cout << endl << endl << setw(30) << "\t\t Вы проиграли!" << endl;
+	system("pause");
 	exit(0);
 }
 
@@ -249,6 +284,13 @@ bool conf(int confi)
 	}
 }
 
+void winner()
+{
+	sound->stop();
+	sound = OpenSound(device, "winn.mp3", false); //открываем наш звук
+	sound->play();
+}
+
 void choice(Phase ques, int list, const vector <string> &prizes) // 
 {
 	int k1;
@@ -256,10 +298,15 @@ void choice(Phase ques, int list, const vector <string> &prizes) //
 	switch (k1)
 	{
 	case 65: // A
+		print_conf_question(ques,prizes,list, 0, 0);
 		if (conf(k1))
 		{
+			print_conf_question(ques, prizes, list, 0, 1);
 			if (ques.question[list].key == ques.question[list].answer[0])
+			{
+				winner();
 				cout << "right" << endl;
+			}
 			else
 				end_game();
 		}
@@ -267,10 +314,15 @@ void choice(Phase ques, int list, const vector <string> &prizes) //
 			choice(ques, list, prizes);
 		break;
 	case 66: // B
+		print_conf_question(ques, prizes, list, 1, 0);
 		if (conf(k1))
 		{
+			print_conf_question(ques, prizes, list, 1, 1);
 			if (ques.question[list].key == ques.question[list].answer[1])
+			{
+				winner();
 				cout << "right" << endl;
+			}
 			else
 				end_game();
 		}
@@ -278,10 +330,15 @@ void choice(Phase ques, int list, const vector <string> &prizes) //
 			choice(ques, list, prizes);
 		break;
 	case 67: // C
+		print_conf_question(ques, prizes, list, 2, 0);
 		if (conf(k1))
 		{
+			print_conf_question(ques, prizes, list, 2, 1);
 			if (ques.question[list].key == ques.question[list].answer[2])
+			{
+				winner();
 				cout << "right" << endl;
+			}
 			else
 				end_game();
 		}
@@ -289,10 +346,15 @@ void choice(Phase ques, int list, const vector <string> &prizes) //
 			choice(ques, list, prizes);
 		break;
 	case 68: // D
+		print_conf_question(ques, prizes, list, 3, 0);
 		if (conf(k1))
 		{
+			print_conf_question(ques, prizes, list, 3, 1);
 			if (ques.question[list].key == ques.question[list].answer[3])
+			{
+				winner();
 				cout << "right" << endl;
+			}
 			else
 				end_game();
 		}
@@ -418,13 +480,11 @@ int main()
 	// +++++++++++++++++++++++++++++++++++++++++++++++
 	// ВЫВОД ЗВУКА
 
-	AudioDevicePtr device = OpenDevice(); //Для начала нужно открыть AudioDevice
 	if (!device) {
 		cout << "Ошибка открытия AudioDevice. Нажмите любую клавишу для выхода..";
 		system("pause");
 		return 0; //выходим из программы
 	}
-	OutputStreamPtr sound = OpenSound(device, "intro.mp3", false); //открываем наш звук
 	if (!sound) {
 		cout << "Ошибка открытия файла! Для выхода нажмите любую клавишу..";
 		system("pause");
@@ -441,13 +501,21 @@ int main()
 	//print_questions(easy);
 	srand(time(0));
 
-	SetColor(7, 6);
+	cout << "Игра \"Кто хочет стать миллионером!\"" << endl;
+	system("pause");
+	
 	for (int i = 0; i <= prizes.size() - 1; i++)
 	{
-
+		
 		list = rand() % easy.question.size();
 		print_dib(prizes);
 		print_one_question(easy, list);
+		sound = OpenSound(device, "next.mp3", false);
+		sound->play();
+		Sleep(3000);
+		sound->stop();
+		sound = OpenSound(device, "mind.mp3", false);
+		sound->play();
 		choice(easy, list, prizes);
 		cur_prize++;
 		system("pause");

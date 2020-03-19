@@ -90,9 +90,12 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\Program Files %28x86%29\audiere-1.9.4-win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
+      <AdditionalLibraryDirectories>D:\Program Files %28x86%29\audiere-1.9.4-win32\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>audiere.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -129,10 +132,10 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="audiere.h" />
+    <None Include="audiere.dll" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="audiere.dll" />
+    <ClInclude Include="audiere.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="audiere.lib" />

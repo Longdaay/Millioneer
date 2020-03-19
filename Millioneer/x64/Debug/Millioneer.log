@@ -1,0 +1,8 @@
+﻿  Source.cpp
+D:\Program Files (x86)\repos\Millioneer-master\Millioneer\Source.cpp(502,12): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
+D:\Program Files (x86)\repos\Millioneer-master\Millioneer\Source.cpp(129): warning C4715: check_key: значение возвращается не при всех путях выполнения
+Source.obj : error LNK2019: ссылка на неразрешенный внешний символ __imp_AdrOpenDevice в функции "class audiere::AudioDevice * __cdecl audiere::OpenDevice(char const *,char const *)" (?OpenDevice@audiere@@YAPEAVAudioDevice@1@PEBD0@Z)
+Source.obj : error LNK2019: ссылка на неразрешенный внешний символ __imp_AdrOpenSampleSource в функции "class audiere::SampleSource * __cdecl audiere::OpenSampleSource(char const *,enum audiere::FileFormat)" (?OpenSampleSource@audiere@@YAPEAVSampleSource@1@PEBDW4FileFormat@1@@Z)
+Source.obj : error LNK2019: ссылка на неразрешенный внешний символ __imp_AdrOpenSound в функции "class audiere::OutputStream * __cdecl audiere::OpenSound(class audiere::RefPtr<class audiere::AudioDevice> const &,class audiere::RefPtr<class audiere::SampleSource> const &,bool)" (?OpenSound@audiere@@YAPEAVOutputStream@1@AEBV?$RefPtr@VAudioDevice@audiere@@@1@AEBV?$RefPtr@VSampleSource@audiere@@@1@_N@Z)
+audiere.lib : warning LNK4272: тип компьютера библиотеки "x86" конфликтует с типом целевого компьютера "x64"
+D:\Program Files (x86)\repos\Millioneer-master\Millioneer\x64\Debug\Millioneer.exe : fatal error LNK1120: неразрешенных внешних элементов: 3

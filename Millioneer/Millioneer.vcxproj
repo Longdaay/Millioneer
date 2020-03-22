@@ -136,6 +136,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="audiere.h" />
+    <ClInclude Include="Debug\stdlib.h" />
+    <ClInclude Include="Debug\time.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="audiere.lib" />

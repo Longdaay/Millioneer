@@ -1,8 +1,8 @@
 ﻿  Source.cpp
-D:\Program Files (x86)\repos\Millioneer-master\Millioneer\Source.cpp(131,20): warning C4018: <=: несоответствие типов со знаком и без знака
-D:\Program Files (x86)\repos\Millioneer-master\Millioneer\Source.cpp(309,11): warning C4018: <=: несоответствие типов со знаком и без знака
-D:\Program Files (x86)\repos\Millioneer-master\Millioneer\Source.cpp(653,20): warning C4018: <=: несоответствие типов со знаком и без знака
-D:\Program Files (x86)\repos\Millioneer-master\Millioneer\Source.cpp(793,12): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
-D:\Program Files (x86)\repos\Millioneer-master\Millioneer\Source.cpp(802,20): warning C4018: <=: несоответствие типов со знаком и без знака
-D:\Program Files (x86)\repos\Millioneer-master\Millioneer\Source.cpp(136): warning C4715: check_key: значение возвращается не при всех путях выполнения
+D:\Program Files (x86)\repos\Millioneer-master\Millioneer\Source.cpp(148,20): warning C4018: <=: несоответствие типов со знаком и без знака
+D:\Program Files (x86)\repos\Millioneer-master\Millioneer\Source.cpp(345,11): warning C4018: <=: несоответствие типов со знаком и без знака
+D:\Program Files (x86)\repos\Millioneer-master\Millioneer\Source.cpp(1071,20): warning C4018: <=: несоответствие типов со знаком и без знака
+D:\Program Files (x86)\repos\Millioneer-master\Millioneer\Source.cpp(1143,20): warning C4018: <=: несоответствие типов со знаком и без знака
+D:\Program Files (x86)\repos\Millioneer-master\Millioneer\Source.cpp(1341,12): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
+D:\Program Files (x86)\repos\Millioneer-master\Millioneer\Source.cpp(153): warning C4715: check_key: значение возвращается не при всех путях выполнения
   Millioneer.vcxproj -> D:\Program Files (x86)\repos\Millioneer-master\Millioneer\Debug\Millioneer.exe

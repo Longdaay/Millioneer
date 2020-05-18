@@ -29,6 +29,8 @@ bool fl_stop_life = TRUE;
 int cur_prize = 0;
 int ex_prize = 0;
 int temp = 5;// перменная в которую запишем дополнительный номер ответа после 50 на 50, также это номер ошибочного ответа ( право на ошибку)
+int noHalfAnswer1 = 5; // переменная, в которую запишем неиспользуемый вариант
+int noHalfAnswer2 = 5; // переменная, в которую запишем неиспользуемый вариант
 int temp_life = 5;
 int m_count = 0;
 int sub_m_count = 0;
@@ -37,39 +39,30 @@ OutputStreamPtr sound = OpenSound(device, "intro.mp3", false); //открываем наш з
 
 void print_dib(const vector<string>& prizes);
 
-
-
-void SetColor(int text, int bg) //Функция смены цвета, взятая из Интернета
-{
+void SetColor(int text, int bg) {
 	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hStdOut, (WORD)((bg << 4) | text));
 }
 
-struct Question
-{
+struct Question {
 	string question;
 	vector<string> answer{ 4 };
 	string key;
 };
 
-struct Phase
-{
+struct Phase {
 	vector<Question> question;
-};
+}easy, midd, hard;
 
-void set_question(ifstream& fout, Phase& easy)
-{
-	if (fout.is_open())
-	{
+void set_question(ifstream& fout, Phase& easy) {
+	if (fout.is_open()) {
 		int count = 1;
 		int i = 0;
 		string temp;
-		while (!fout.eof())
-		{
+		while (!fout.eof()) {
 			easy.question.resize(count);
 			getline(fout, easy.question[i].question, ';');
-			for (int j = 0; j <= 3; j++)
-			{
+			for (int j = 0; j <= 3; j++) {
 				getline(fout, easy.question[i].answer[j], ';');
 			}
 			getline(fout, easy.question[i].key, '\n');
@@ -77,16 +70,17 @@ void set_question(ifstream& fout, Phase& easy)
 			count++;
 		}
 	}
+	fout.close();
 }
 
-void menu(const Phase& ques, const vector <string>& prizes);
-void menu_prize(const Phase& ques, const vector <string>& prizes);
-void play(const Phase& ques, const vector <string>& prizes);
-void millioneer(const Phase& ques, const vector <string>& prizes);
+void menu(const vector <string>& prizes);
+void menu_prize(const vector <string>& prizes);
+void play(const vector <string>& prizes);
+void millioneer(const vector <string>& prizes);
+void choice(const Phase& ques, int list, const vector <string>& prizes);
 
 
-void print_one_question(const Phase& ques, int list)
-{
+void print_one_question(const Phase& ques, int list) {
 	cout << " -------------------------------------------------------------------------------------------------------" << endl;
 	cout << "\t" << ques.question[list].question << "" << endl;
 	cout << " -------------------------------------------------------------------------------------------------------" << endl;
@@ -123,14 +117,10 @@ void print_one_question(const Phase& ques, int list)
 	cout << endl;
 }
 
-bool half_answers(const Phase& ques, string key, int temp, int cur_ans, int list)
-{
-	if (!fl_life or fl_stop)
-	{
-		if (temp != 5)
-		{
-			if (fl_half and fl_stop)
-			{
+bool half_answers(const Phase& ques, string key, int temp, int cur_ans, int list) {
+	if (!fl_life or fl_stop) {
+		if (temp != 5) {
+			if (fl_half and fl_stop) {
 				SetColor(0, 0);
 				if (ques.question[list].answer[cur_ans] == ques.question[list].answer[temp])
 					SetColor(7, 0);
@@ -143,30 +133,47 @@ bool half_answers(const Phase& ques, string key, int temp, int cur_ans, int list
 	return 0;
 }
 
-string check_key(const Phase& ques, int list)
-{
-	for (int i = 0; i <= ques.question[list].answer.size() - 1; i++)
-	{
+string check_key(const Phase& ques, int list) {
+	for (int i = 0; i <= ques.question[list].answer.size() - 1; i++) {
 		if (ques.question[list].key == ques.question[list].answer[i])
 			return ques.question[list].answer[i];
 	}
 }
 
-void print_half_answer(const Phase& ques, int list)
-{
+int check_keyInt(const Phase& ques, int list) {
+	for (int i = 0; i <= ques.question[list].answer.size() - 1; i++) {
+		if (ques.question[list].key == ques.question[list].answer[i])
+			return i;
+	}
+}
 
+void fillNoAnswer(const Phase& ques, int list, string key, int ex_key) {
+	while (true) {
+		noHalfAnswer1 = rand() % ques.question[list].answer.size();
+		if (ques.question[list].answer[noHalfAnswer1] != key && ques.question[list].answer[noHalfAnswer1] != ques.question[list].answer[ex_key])
+			break;
+	}
+	while (true) {
+		noHalfAnswer2 = rand() % ques.question[list].answer.size();
+		if (ques.question[list].answer[noHalfAnswer2] != key &&
+			ques.question[list].answer[noHalfAnswer2] != ques.question[list].answer[ex_key] &&
+			ques.question[list].answer[noHalfAnswer2] != ques.question[list].answer[noHalfAnswer1])
+			break;
+	}
+}
+
+void print_half_answer(const Phase& ques, int list) {
 	bool fl = TRUE;
 	string key = check_key(ques, list);
-	if (temp == 5)
-	{
+	if (temp == 5) {
 		temp = 0;
-		while (fl)
-		{
+		while (fl) {
 			temp = rand() % ques.question[list].answer.size();
 			if (ques.question[list].answer[temp] != key)
 				fl = FALSE;
 		}
 	}
+	fillNoAnswer(ques, list, key, temp);
 
 	sound->stop();
 	sound = OpenSound(device, "half.mp3", false); //открываем наш звук
@@ -236,32 +243,26 @@ void print_half_answer(const Phase& ques, int list)
 	sound->setRepeat(true);
 }
 
-void print_life_color(const Phase& ques, int list, int current_conf)
-{
-	if (!fl_stop_life)
-	{
+void print_life_color(const Phase& ques, int list, int current_conf) {
+	if (!fl_stop_life) {
 		if (current_conf == temp_life)
 			SetColor(4, 0);
 	}
 }
 
-void print_conf_color(const Phase& ques, int list, int current_conf, int current_value, bool flag)
-{
-	if (flag)
-	{
+void print_conf_color(const Phase& ques, int list, int current_conf, int current_value, bool flag) {
+	if (flag) {
 		if (ques.question[list].answer[current_value] == ques.question[list].key)
 			SetColor(10, 0);
 	}
-	else
-	{
+	else {
 		if (current_value == current_conf)
 			SetColor(6, 0);
 	}
 
 }
 
-void print_conf_question(const Phase& ques, const vector <string>& prizes, int list, int current_conf, bool flag)
-{
+void print_conf_question(const Phase& ques, const vector <string>& prizes, int list, int current_conf, bool flag) {
 
 	system("cls");
 	print_dib(prizes);
@@ -328,22 +329,17 @@ void print_conf_question(const Phase& ques, const vector <string>& prizes, int l
 
 	print_conf_color(ques, list, current_conf, 2, flag); print_life_color(ques, list, 2); cout << "\t -------------------------"; SetColor(7, 0); cout << "               "; print_conf_color(ques, list, current_conf, 3, flag); print_life_color(ques, list, 3); cout << "------------------------ "; SetColor(7, 0); cout << endl;
 
-	if (!fl_life)
-	{
+	if (!fl_life) {
 		if (fl_half and fl_s_half) // если после 50 на 50 мы и выбрали ответ и подтвердили его, больше не выводим по 2 ответа
-		{
 			fl_stop = FALSE;
-		}
 		if (fl_half)
 			fl_s_half = TRUE; // переводим второй флаг в 1, чтобы перестать выводить только 2 ответа
 	}
 }
 
-void print_questions(const Phase& easy)
-{
+void print_questions(const Phase& easy) {
 	int i = 0;
-	while (i <= easy.question.size() - 1)
-	{
+	while (i <= easy.question.size() - 1) {
 		print_one_question(easy, i);
 		i++;
 	}
@@ -358,24 +354,21 @@ void end_game(const Phase& ques, const vector <string>& prizes)
 	cout << setw(75) << right << "---------------------------------------------" << endl;
 	cout << setw(60) << right << "Вы проиграли!" << endl;
 	cout << setw(75) << right << "---------------------------------------------" << endl;
-	if (cur_prize >= ex_prize)
-	{
+	if (cur_prize <= ex_prize || cur_prize == 0) {
+	cout << "Ваш выигрыш: "; SetColor(3, 0); cout << "0"; SetColor(7, 0); cout << endl;
+	}
+	else {
 		cout << "Ваш выигрыш : "; SetColor(3, 0); cout << prizes[ex_prize]; SetColor(7, 0); cout << endl;
 	}
-	else
-	{
-		cout << "Ваш выигрыш: "; SetColor(3, 0); cout << "0"; SetColor(7, 0); cout << endl;
-	}
+
 	system("pause");
-	millioneer(ques, prizes);
+	millioneer(prizes);
 }
 
-bool conf(int confi)
-{
+bool conf(int confi) {
 	int value;
 	value = _getch();
-	switch (value)
-	{
+	switch (value) {
 	case 65:
 		if (confi == value)
 			return 1;
@@ -405,8 +398,7 @@ bool conf(int confi)
 	}
 }
 
-void winner()
-{
+void winner() {
 	sound->stop();
 	sound = OpenSound(device, "winn.mp3", false); //открываем наш звук
 	sound->play();
@@ -416,8 +408,7 @@ void winner()
 	cout << setw(75) << right << "---------------------------------------------" << endl;
 }
 
-void print_logo()
-{
+void print_logo() {
 	cout << endl;
 	cout << "=##############################################################################################################################################################=" << endl;
 	cout << "=##############################################################################################################################################################=" << endl;
@@ -440,67 +431,94 @@ void print_logo()
 	cout << endl << endl;
 }
 
-void print_voting(const Phase& ques, int list)
-{
+void print_voting(const Phase& ques, int list) {
 	sound->stop();
 	sound = OpenSound(device, "voting.mp3", false); //открываем наш звук
 	sound->play();
-	int maxim_val = 0;
-	int temp1 = 0;
-	int temp2 = 0;
-	int number_of_answer;
+
 	int A, B, C, D;
-	A = rand() % 1000;
-	B = (1000 - A) - (rand() % (1000 - A));
-	C = (1000 - A - B) - (rand() % (1000 - A - B));
-	D = 1000 - A - B - C;
+	bool fl = TRUE;
+	int key = check_keyInt(ques, list);
+	int number_of_answer;
+
+	if (temp == 5) {
+		temp = 0;
+		while (fl) {
+			temp = rand() % ques.question[list].answer.size();
+			if (ques.question[list].answer[temp] != ques.question[list].answer[key])
+				fl = FALSE;
+		}
+	}
+	rand() % 2 ? number_of_answer = key : number_of_answer = temp;
+
+	switch (number_of_answer) {
+	case 0:
+		A = 0;
+		while (A < 600)
+			A = rand() % 1000;
+		B = (1000 - A) - (rand() % (1000 - A));
+		C = (1000 - A - B) - (rand() % (1000 - A - B));
+		D = 1000 - A - B - C;
+		break;
+	case 1:
+		B = 0;
+		while (B < 600)
+			B = rand() % 1000;
+		A = (1000 - B) - (rand() % (1000 - B));
+		C = (1000 - A - B) - (rand() % (1000 - A - B));
+		D = 1000 - A - B - C;
+		break;
+	case 2:
+		C = 0;
+		while (C < 600)
+			C = rand() % 1000;
+		A = (1000 - C) - (rand() % (1000 - C));
+		B = (1000 - A - C) - (rand() % (1000 - A - C));
+		D = 1000 - A - B - C;
+		break;
+	case 3:
+		D = 0;
+		while (D < 600)
+			D = rand() % 1000;
+		A = (1000 - D) - (rand() % (1000 - D));
+		B = (1000 - A - D) - (rand() % (1000 - A - D));
+		C = 1000 - A - B - D;
+		break;
+	default:
+		break;
+	}
 
 	cout << "A (" << A << "):  \t";
 	SetColor(0, 8);
 	for (int i = 0; i <= A / 10; i++)
-	{
 		cout << " ";
-	}
 	SetColor(7, 0);
 	cout << endl;
+
 	Sleep(3000);
 	cout << "B (" << B << "):  \t";
 	SetColor(0, 9);
 	for (int i = 0; i <= B / 10; i++)
-	{
 		cout << " ";
-	}
 	SetColor(7, 0);
 	cout << endl;
+
 	Sleep(3000);
 	cout << "C (" << C << "):  \t";
 	SetColor(0, 10);
 	for (int i = 0; i <= C / 10; i++)
-	{
 		cout << " ";
-	}
 	SetColor(7, 0);
 	cout << endl;
+
 	Sleep(3000);
 	cout << "D (" << D << "):  \t";
 	SetColor(0, 11);
 	for (int i = 0; i <= D / 10; i++)
-	{
 		cout << " ";
-	}
 	SetColor(7, 0);
 	cout << endl << endl;
-	temp1 = max(A, B);
-	temp2 = max(C, D);
-	maxim_val = max(temp1, temp2);
-	if (maxim_val == A)
-		number_of_answer = 0;
-	if (maxim_val == B)
-		number_of_answer = 1;
-	if (maxim_val == C)
-		number_of_answer = 2;
-	if (maxim_val == D)
-		number_of_answer = 3;
+
 	cout << setw(80) << right << "---------------------------------------------" << endl;
 	cout << setw(43) << right << "Ответ: " << ques.question[list].answer[number_of_answer] << endl;
 	cout << setw(80) << right << "---------------------------------------------" << endl;
@@ -511,8 +529,7 @@ void print_voting(const Phase& ques, int list)
 	sound->setRepeat(true);
 }
 
-void print_call(const Phase& ques, int list, const vector <string>& prizes)
-{
+void print_call(const Phase& ques, int list, const vector <string>& prizes) {
 	sound->stop();
 	sound = OpenSound(device, "file.wav", false); //открываем наш звук
 	sound->play();
@@ -543,7 +560,19 @@ void print_call(const Phase& ques, int list, const vector <string>& prizes)
 	cout << setw(100) << right << "               --:**************:--               " << endl;
 	cout << setw(100) << right << "                                                  " << endl;
 	Sleep(8000);
-	int number_of_answer = rand() % ques.question[list].answer.size();
+	
+	bool fl = TRUE;
+	int key = check_keyInt(ques, list);
+	int number_of_answer;
+	if (temp == 5) {
+		temp = 0;
+		while (fl) {
+			temp = rand() % ques.question[list].answer.size();
+			if (ques.question[list].answer[temp] != ques.question[list].answer[key])
+				fl = FALSE;
+		}
+	}
+	rand() % 2 ? number_of_answer = key : number_of_answer = temp;
 	print_dib(prizes);
 	print_one_question(ques, list);
 
@@ -583,36 +612,36 @@ void print_call(const Phase& ques, int list, const vector <string>& prizes)
 	sound->setRepeat(true);
 }
 
-void choice_life(const Phase& ques, int list, const vector <string>& prizes)
-{
+void choice_life(const Phase& ques, int list, const vector <string>& prizes) {
 	sound->stop();
 	sound = OpenSound(device, "mind.mp3", false); //открываем наш звук
 	sound->play();
 	sound->setRepeat(true);
 	int k1;
 	k1 = _getch();
-	switch (k1)
-	{
+	switch (k1) {
 	case 65: // A
+		if (fl_half)
+			if (ques.question[list].answer[noHalfAnswer1] == ques.question[list].answer[0] or
+				ques.question[list].answer[noHalfAnswer2] == ques.question[list].answer[0]) {
+				choice_life(ques, list, prizes);
+				return;
+			}
 		print_conf_question(ques, prizes, list, 0, 0);
 		fl_stop_life = FALSE;
-		if (conf(k1))
-		{
+		if (conf(k1)) {
 			sound->stop();
 			sound = OpenSound(device, "conf.mp3", false); //открываем наш звук
 			sound->play();
 			Sleep(4000);
-			if (ques.question[list].key == ques.question[list].answer[0])
-			{
+			if (ques.question[list].key == ques.question[list].answer[0]) {
 				print_conf_question(ques, prizes, list, 0, 1);
 				winner();
 				fl_stop = TRUE;
 			}
-			else
-			{
+			else {
 				//print_conf_question(ques, prizes, list, 0, 1);
-				if (!fl_endgame)
-				{
+				if (!fl_endgame) {
 					sound->stop();
 					sound = OpenSound(device, "lifewrong.mp3", false); //открываем наш звук
 					sound->play();
@@ -622,8 +651,7 @@ void choice_life(const Phase& ques, int list, const vector <string>& prizes)
 					fl_endgame = TRUE;
 					choice_life(ques, list, prizes);
 				}
-				else
-				{
+				else {
 					print_conf_question(ques, prizes, list, 0, 1);
 					fl_stop = TRUE;
 					end_game(ques, prizes);
@@ -634,23 +662,26 @@ void choice_life(const Phase& ques, int list, const vector <string>& prizes)
 			choice_life(ques, list, prizes);
 		break;
 	case 66: // B
+		if(fl_half)
+			if (ques.question[list].answer[noHalfAnswer1] == ques.question[list].answer[1] or
+				ques.question[list].answer[noHalfAnswer2] == ques.question[list].answer[1]) {
+				choice_life(ques, list, prizes);
+				return;
+			}
 		print_conf_question(ques, prizes, list, 1, 0);
 		fl_stop_life = FALSE;
-		if (conf(k1))
-		{
+		if (conf(k1)) {
 			sound->stop();
 			sound = OpenSound(device, "conf.mp3", false); //открываем наш звук
 			sound->play();
 			Sleep(4000);
-			if (ques.question[list].key == ques.question[list].answer[1])
-			{
+			if (ques.question[list].key == ques.question[list].answer[1]) {
 				print_conf_question(ques, prizes, list, 1, 1);
 				winner();
 				fl_stop = TRUE;
 			}
 			else
-				if (!fl_endgame)
-				{
+				if (!fl_endgame) {
 					sound->stop();
 					sound = OpenSound(device, "lifewrong.mp3", false); //открываем наш звук
 					sound->play();
@@ -660,8 +691,7 @@ void choice_life(const Phase& ques, int list, const vector <string>& prizes)
 					fl_endgame = TRUE;
 					choice_life(ques, list, prizes);
 				}
-				else
-				{
+				else {
 					print_conf_question(ques, prizes, list, 1, 1);
 					fl_stop = TRUE;
 					end_game(ques, prizes);
@@ -671,23 +701,26 @@ void choice_life(const Phase& ques, int list, const vector <string>& prizes)
 			choice_life(ques, list, prizes);
 		break;
 	case 67: // C
+		if (fl_half)
+			if (ques.question[list].answer[noHalfAnswer1] == ques.question[list].answer[2] or
+				ques.question[list].answer[noHalfAnswer2] == ques.question[list].answer[2]) {
+				choice_life(ques, list, prizes);
+				return;
+			}
 		print_conf_question(ques, prizes, list, 2, 0);
 		fl_stop_life = FALSE;
-		if (conf(k1))
-		{
+		if (conf(k1)) {
 			sound->stop();
 			sound = OpenSound(device, "conf.mp3", false); //открываем наш звук
 			sound->play();
 			Sleep(4000);
-			if (ques.question[list].key == ques.question[list].answer[2])
-			{
+			if (ques.question[list].key == ques.question[list].answer[2]) {
 				print_conf_question(ques, prizes, list, 2, 1);
 				winner();
 				fl_stop = TRUE;
 			}
 			else
-				if (!fl_endgame)
-				{
+				if (!fl_endgame) {
 					sound->stop();
 					sound = OpenSound(device, "lifewrong.mp3", false); //открываем наш звук
 					sound->play();
@@ -697,8 +730,7 @@ void choice_life(const Phase& ques, int list, const vector <string>& prizes)
 					fl_endgame = TRUE;
 					choice_life(ques, list, prizes);
 				}
-				else
-				{
+				else {
 					print_conf_question(ques, prizes, list, 2, 1);
 					fl_stop = TRUE;
 					end_game(ques, prizes);
@@ -708,23 +740,26 @@ void choice_life(const Phase& ques, int list, const vector <string>& prizes)
 			choice_life(ques, list, prizes);
 		break;
 	case 68: // D
+		if (fl_half)
+			if (ques.question[list].answer[noHalfAnswer1] == ques.question[list].answer[3] or
+				ques.question[list].answer[noHalfAnswer2] == ques.question[list].answer[3]) {
+				choice_life(ques, list, prizes);
+				return;
+			}
 		print_conf_question(ques, prizes, list, 3, 0);
 		fl_stop_life = FALSE;
-		if (conf(k1))
-		{
+		if (conf(k1)) {
 			sound->stop();
 			sound = OpenSound(device, "conf.mp3", false); //открываем наш звук
 			sound->play();
 			Sleep(4000);
-			if (ques.question[list].key == ques.question[list].answer[3])
-			{
+			if (ques.question[list].key == ques.question[list].answer[3]) {
 				print_conf_question(ques, prizes, list, 3, 1);
 				winner();
 				fl_stop = TRUE;
 			}
 			else
-				if (!fl_endgame)
-				{
+				if (!fl_endgame) {
 					sound->stop();
 					sound = OpenSound(device, "lifewrong.mp3", false); //открываем наш звук
 					sound->play();
@@ -734,8 +769,7 @@ void choice_life(const Phase& ques, int list, const vector <string>& prizes)
 					fl_endgame = TRUE;
 					choice_life(ques, list, prizes);
 				}
-				else
-				{
+				else {
 					print_conf_question(ques, prizes, list, 3, 1);
 					fl_stop = TRUE;
 					end_game(ques, prizes);
@@ -749,106 +783,96 @@ void choice_life(const Phase& ques, int list, const vector <string>& prizes)
 	}
 }
 
-void choice(const Phase& ques, int list, const vector <string>& prizes) // 
-{
+void choice_half(const Phase& ques, int list, const vector <string>& prizes) {
 	int k1;
 	k1 = _getch(); // получаем символ без вывода знака
-	switch (k1)
-	{
+	switch (k1) {
 	case 65: // A
+		if (ques.question[list].answer[noHalfAnswer1] == ques.question[list].answer[0] or
+			ques.question[list].answer[noHalfAnswer2] == ques.question[list].answer[0]) {
+			choice_half(ques, list, prizes);
+			return;
+		}
 		print_conf_question(ques, prizes, list, 0, 0);
-		if (conf(k1))
-		{
+		if (conf(k1)) {
 			sound->stop();
 			sound = OpenSound(device, "conf.mp3", false); //открываем наш звук
 			sound->play();
 			Sleep(4000);
 			print_conf_question(ques, prizes, list, 0, 1);
 			if (ques.question[list].key == ques.question[list].answer[0])
-			{
 				winner();
-			}
 			else
 				end_game(ques, prizes);
 		}
 		else
-			choice(ques, list, prizes);
+			choice_half(ques, list, prizes);
 		break;
 	case 66: // B
+		if (ques.question[list].answer[noHalfAnswer1] == ques.question[list].answer[1] or
+			ques.question[list].answer[noHalfAnswer2] == ques.question[list].answer[1]) {
+			choice_half(ques, list, prizes);
+			return;
+		}
 		print_conf_question(ques, prizes, list, 1, 0);
-		if (conf(k1))
-		{
+		if (conf(k1)) {
 			sound->stop();
 			sound = OpenSound(device, "conf.mp3", false); //открываем наш звук
 			sound->play();
 			Sleep(4000);
 			print_conf_question(ques, prizes, list, 1, 1);
 			if (ques.question[list].key == ques.question[list].answer[1])
-			{
 				winner();
-			}
 			else
 				end_game(ques, prizes);
 		}
 		else
-			choice(ques, list, prizes);
+			choice_half(ques, list, prizes);
 		break;
 	case 67: // C
+		if (ques.question[list].answer[noHalfAnswer1] == ques.question[list].answer[2] or
+			ques.question[list].answer[noHalfAnswer2] == ques.question[list].answer[2]) {
+			choice_half(ques, list, prizes);
+			return;
+		}
 		print_conf_question(ques, prizes, list, 2, 0);
-		if (conf(k1))
-		{
+		if (conf(k1)) {
 			sound->stop();
 			sound = OpenSound(device, "conf.mp3", false); //открываем наш звук
 			sound->play();
 			Sleep(4000);
 			print_conf_question(ques, prizes, list, 2, 1);
 			if (ques.question[list].key == ques.question[list].answer[2])
-			{
 				winner();
-			}
 			else
 				end_game(ques, prizes);
 		}
 		else
-			choice(ques, list, prizes);
+			choice_half(ques, list, prizes);
 		break;
 	case 68: // D
+		if (ques.question[list].answer[noHalfAnswer1] == ques.question[list].answer[3] or
+			ques.question[list].answer[noHalfAnswer2] == ques.question[list].answer[3]) {
+			choice_half(ques, list, prizes);
+			return;
+		}
 		print_conf_question(ques, prizes, list, 3, 0);
-		if (conf(k1))
-		{
+		if (conf(k1)) {
 			sound->stop();
 			sound = OpenSound(device, "conf.mp3", false); //открываем наш звук
 			sound->play();
 			Sleep(4000);
 			print_conf_question(ques, prizes, list, 3, 1);
 			if (ques.question[list].key == ques.question[list].answer[3])
-			{
 				winner();
-			}
 			else
 				end_game(ques, prizes);
 		}
 		else
-			choice(ques, list, prizes);
-		break;
-	case 72: // H
-		if (!fl_half)
-		{
-			sound->stop();
-			sound = OpenSound(device, "line.mp3", false); //открываем наш звук
-			sound->play();
-			Sleep(700);
-			fl_half = TRUE;
-			print_dib(prizes);
-			print_half_answer(ques, list);
-			choice(ques, list, prizes);
-		}
-		else
-			choice(ques, list, prizes);
+			choice_half(ques, list, prizes);
 		break;
 	case 70: // F
-		if (!fl_friends)
-		{
+		if (!fl_friends) {
 			sound->stop();
 			sound = OpenSound(device, "line.mp3", false); //открываем наш звук
 			sound->play();
@@ -857,28 +881,26 @@ void choice(const Phase& ques, int list, const vector <string>& prizes) //
 			print_dib(prizes);
 			print_one_question(ques, list);
 			print_voting(ques, list);
-			choice(ques, list, prizes);
+			choice_half(ques, list, prizes);
 		}
 		else
-			choice(ques, list, prizes);
+			choice_half(ques, list, prizes);
 		break;
 	case 80: // P
-		if (!fl_phone)
-		{
+		if (!fl_phone) {
 			sound->stop();
 			sound = OpenSound(device, "line.mp3", false); //открываем наш звук
 			sound->play();
 			Sleep(700);
 			fl_phone = TRUE;
 			print_call(ques, list, prizes);
-			choice(ques, list, prizes);
+			choice_half(ques, list, prizes);
 		}
 		else
-			choice(ques, list, prizes);
+			choice_half(ques, list, prizes);
 		break;
 	case 76: // L
-		if (!fl_life)
-		{
+		if (!fl_life) {
 			sound->stop();
 			sound = OpenSound(device, "line.mp3", false); //открываем наш звук
 			sound->play();
@@ -900,6 +922,152 @@ void choice(const Phase& ques, int list, const vector <string>& prizes) //
 			choice_life(ques, list, prizes);
 		}
 		else
+			choice_half(ques, list, prizes);
+		break;
+	default:
+		choice_half(ques, list, prizes);
+	}
+}
+
+void choice(const Phase& ques, int list, const vector <string>& prizes) {
+	int k1;
+	k1 = _getch(); // получаем символ без вывода знака
+	switch (k1) {
+	case 65: // A
+		print_conf_question(ques, prizes, list, 0, 0);
+		if (conf(k1)) {
+			sound->stop();
+			sound = OpenSound(device, "conf.mp3", false); //открываем наш звук
+			sound->play();
+			Sleep(4000);
+			print_conf_question(ques, prizes, list, 0, 1);
+			if (ques.question[list].key == ques.question[list].answer[0])
+			{
+				winner();
+			}
+			else
+				end_game(ques, prizes);
+		}
+		else
+			choice(ques, list, prizes);
+		break;
+	case 66: // B
+		print_conf_question(ques, prizes, list, 1, 0);
+		if (conf(k1)) {
+			sound->stop();
+			sound = OpenSound(device, "conf.mp3", false); //открываем наш звук
+			sound->play();
+			Sleep(4000);
+			print_conf_question(ques, prizes, list, 1, 1);
+			if (ques.question[list].key == ques.question[list].answer[1])
+			{
+				winner();
+			}
+			else
+				end_game(ques, prizes);
+		}
+		else
+			choice(ques, list, prizes);
+		break;
+	case 67: // C
+		print_conf_question(ques, prizes, list, 2, 0);
+		if (conf(k1)) {
+			sound->stop();
+			sound = OpenSound(device, "conf.mp3", false); //открываем наш звук
+			sound->play();
+			Sleep(4000);
+			print_conf_question(ques, prizes, list, 2, 1);
+			if (ques.question[list].key == ques.question[list].answer[2])
+			{
+				winner();
+			}
+			else
+				end_game(ques, prizes);
+		}
+		else
+			choice(ques, list, prizes);
+		break;
+	case 68: // D
+		print_conf_question(ques, prizes, list, 3, 0);
+		if (conf(k1)) {
+			sound->stop();
+			sound = OpenSound(device, "conf.mp3", false); //открываем наш звук
+			sound->play();
+			Sleep(4000);
+			print_conf_question(ques, prizes, list, 3, 1);
+			if (ques.question[list].key == ques.question[list].answer[3])
+			{
+				winner();
+			}
+			else
+				end_game(ques, prizes);
+		}
+		else
+			choice(ques, list, prizes);
+		break;
+	case 72: // H
+		if (!fl_half) {
+			sound->stop();
+			sound = OpenSound(device, "line.mp3", false); //открываем наш звук
+			sound->play();
+			Sleep(700);
+			fl_half = TRUE;
+			print_dib(prizes);
+			print_half_answer(ques, list);
+			choice_half(ques, list, prizes);
+		}
+		else
+			choice(ques, list, prizes);
+		break;
+	case 70: // F
+		if (!fl_friends) {
+			sound->stop();
+			sound = OpenSound(device, "line.mp3", false); //открываем наш звук
+			sound->play();
+			Sleep(700);
+			fl_friends = TRUE;
+			print_dib(prizes);
+			print_one_question(ques, list);
+			print_voting(ques, list);
+			choice(ques, list, prizes);
+		}
+		else
+			choice(ques, list, prizes);
+		break;
+	case 80: // P
+		if (!fl_phone) {
+			sound->stop();
+			sound = OpenSound(device, "line.mp3", false); //открываем наш звук
+			sound->play();
+			Sleep(700);
+			fl_phone = TRUE;
+			print_call(ques, list, prizes);
+			choice(ques, list, prizes);
+		}
+		else
+			choice(ques, list, prizes);
+		break;
+	case 76: // L
+		if (!fl_life) {
+			sound->stop();
+			sound = OpenSound(device, "line.mp3", false); //открываем наш звук
+			sound->play();
+			Sleep(700);
+			fl_life = TRUE;
+			fl_phone = TRUE;
+			fl_friends = TRUE;
+			if (fl_half and fl_stop) {
+				print_dib(prizes);
+				print_half_answer(ques, list);
+			}
+			else {
+				fl_half = TRUE;
+				print_dib(prizes);
+				print_one_question(ques, list);
+			}
+			choice_life(ques, list, prizes);
+		}
+		else
 			choice(ques, list, prizes);
 		break;
 	default:
@@ -907,190 +1075,160 @@ void choice(const Phase& ques, int list, const vector <string>& prizes) //
 	}
 }
 
-void print_prize(int list)
-{
+void print_prize(int list) {
 	if (ex_prize == list)
 		SetColor(9, 0);
 	if (cur_prize == list)
 		SetColor(6, 0);
 }
 
-void print_half()
-{
+void print_half() {
 	if (fl_half)
 		SetColor(0, 0);
 	else
 		SetColor(6, 0);
 }
 
-void print_phone()
-{
+void print_phone() {
 	if (fl_phone)
 		SetColor(0, 0);
 	else
 		SetColor(6, 0);
 }
 
-void print_friends()
-{
+void print_friends() {
 	if (fl_friends)
 		SetColor(0, 0);
 	else
 		SetColor(6, 0);
 }
 
-void print_life()
-{
+void print_life() {
 	if (fl_life)
 		SetColor(0, 0);
 	else
 		SetColor(6, 0);
 }
 
-void conf_menu_prizes(const Phase& ques, const vector <string>& prizes)
-{
-	switch (sub_m_count) // проверям, взяв первый символ переменной value
-	{
-	case 0: // если соглашаемся
+void conf_menu_prizes(const vector <string>& prizes) {
+	switch (sub_m_count) {
+	case 0:
 		ex_prize = 0;
-		play(ques, prizes);
 		break;
-	case 1: // если отказываемся
+	case 1:
 		ex_prize = 1;
-		play(ques, prizes);
 		break;
-	case 2: // если отказываемся
+	case 2:
 		ex_prize = 2;
-		play(ques, prizes);
 		break;
-	case 3: // если отказываемся
+	case 3:
 		ex_prize = 3;
-		play(ques, prizes);
 		break;
-	case 4: // если отказываемся
+	case 4:
 		ex_prize = 4;
-		play(ques, prizes);
 		break;
-	case 5: // если отказываемся
+	case 5: 
 		ex_prize = 5;
-		play(ques, prizes);
 		break;
-	case 6: // если отказываемся
+	case 6: 
 		ex_prize = 6;
-		play(ques, prizes);
 		break;
-	case 7: // если отказываемся
+	case 7:
 		ex_prize = 7;
-		play(ques, prizes);;
 		break;
-	case 8: // если отказываемся
+	case 8:
 		ex_prize = 8;
-		play(ques, prizes);
 		break;
-	case 9: // если отказываемся
+	case 9:
 		ex_prize = 9;
-		play(ques, prizes);
 		break;
-	case 10: // если отказываемся
+	case 10:
 		ex_prize = 10;
-		play(ques, prizes);
 		break;
-	case 11: // если отказываемся
+	case 11:
 		ex_prize = 11;
-		play(ques, prizes);
 		break;
-	case 12: // если отказываемся
+	case 12:
 		ex_prize = 12;
-		play(ques, prizes);
 		break;
-	case 13: // если отказываемся
+	case 13:
 		ex_prize = 13;
-		play(ques, prizes);
 		break;
-	case 14: // если отказываемся
+	case 14:
 		ex_prize = 14;
-		play(ques, prizes);
 		break;
 	default:
 		break;
 	}
+	play(prizes);
 }
 
-void menu_prize_choice(const Phase& ques, const vector <string>& prizes)
-{
+void menu_prize_choice(const vector <string>& prizes) {
 	int k1;
 	k1 = _getch(); // получаем символ стрелки без вывода знака
-	if (k1 == 0xE0) // если стрелки
-	{
-		switch (k1)
-		{
+	if (k1 == 0xE0) {
+		switch (k1) {
 		case 0x48: // стрелка вверх
 			sub_m_count--;
 			if (sub_m_count < 0) sub_m_count = 0;
-			menu_prize(ques, prizes);
+			menu_prize(prizes);
 			break;
 
 		case 0x50: // стрелка вниз
 			sub_m_count++;
 			if (sub_m_count > 14) sub_m_count = 14;
-			menu_prize(ques, prizes);
+			menu_prize(prizes);
 			break;
 		case 0xD: // подтвердить
-			conf_menu_prizes(ques, prizes);
+			conf_menu_prizes(prizes);
 			break;
 		default:
-			menu_prize_choice(ques, prizes);
+			menu_prize_choice(prizes);
 		}
 	}
-	switch (k1)
-	{
+	switch (k1) {
 	case 0x48: // стрелка вверх
 		sub_m_count--;
 		if (sub_m_count < 0) sub_m_count = 0;
-		menu_prize(ques, prizes);
+		menu_prize(prizes);
 		break;
 
 	case 0x50: // стрелка вниз
 		sub_m_count++;
 		if (sub_m_count > 14) sub_m_count = 14;
-		menu_prize(ques, prizes);
+		menu_prize(prizes);
 		break;
 	case 0xD: // подтвердить
-		conf_menu_prizes(ques, prizes);
+		conf_menu_prizes(prizes);
 		break;
 	default:
-		menu_prize_choice(ques, prizes);
+		menu_prize_choice(prizes);
 	}
 }
 
-void menu_prize(const Phase& ques, const vector <string>& prizes)
-{
+void menu_prize(const vector <string>& prizes) {
 	system("cls");
 	cout << endl;
 	cout << "Выберите несгораемую сумму: " << endl;
-	for (int i = 0; i <= prizes.size() - 1; i++)
-	{
-		if (i <= 8)
-		{
+	for (int i = 0; i <= prizes.size() - 1; i++) {
+		if (i <= 8) {
 			if (sub_m_count == i)
 				SetColor(6, 0);
 			cout << i + 1 << ".  " << setw(13) << right << prizes[i] << endl;
 			SetColor(7, 0);
 		}
-		else
-		{
+		else {
 			if (sub_m_count == i)
 				SetColor(6, 0);
 			cout << i + 1 << ". " << setw(13) << right << prizes[i] << endl;
 			SetColor(7, 0);
 		}
 	}
-	menu_prize_choice(ques, prizes);
+	menu_prize_choice(prizes);
 }
 
 
-void print_dib(const vector<string>& prizes)
-{
+void print_dib(const vector<string>& prizes) {
 	system("cls");
 	cout << endl << endl;
 	cout << "......................:=@######@#@@@%@@@##################@%%%@#####%####@+-............-.-.-------------" << "   "; print_half();  cout << " ----------"; SetColor(7, 0); cout << "    "; print_phone(); cout << " ----------"; SetColor(7, 0); cout << "    "; print_friends(); cout << " ----------"; SetColor(7, 0); cout << "    "; print_life(); cout << " ----------"; SetColor(7, 0); cout << endl;
@@ -1125,8 +1263,7 @@ void print_dib(const vector<string>& prizes)
 	cout << endl << endl << endl;
 }
 
-void play(const Phase& ques, const vector <string>& prizes)
-{
+void play(const vector <string>& prizes) {
 	sound->stop();
 	sound = OpenSound(device, "begin.mp3", false);
 	sound->play();
@@ -1138,20 +1275,30 @@ void play(const Phase& ques, const vector <string>& prizes)
 	fl_phone = FALSE;
 	fl_stop = TRUE;
 	fl_s_half = FALSE;
+	noHalfAnswer1 = 5;
+	noHalfAnswer2 = 5;
 	temp = 5;
-	//system("pause"); ///////////////////////////////////////////////////////////////////////
-	for (int i = 0; i <= prizes.size() - 1; i++)
-	{
-		if (i == 14)
-		{
+	for (int i = 0; i <= prizes.size() - 1; i++) {
+		int list;
+		if (i == 14) {
 			sound->stop();
 			sound = OpenSound(device, "siren.mp3", false);
 			sound->play();
 			Sleep(4000);
 		}
-		int list = rand() % ques.question.size();
 		print_dib(prizes);
-		print_one_question(ques, list);
+		if (i >= 0 and i < 5) {
+			list = rand() % easy.question.size();
+			print_one_question(easy, list);
+		}
+		if (i >= 5 and i < 10) {
+			list = rand() % midd.question.size();
+			print_one_question(midd, list);
+		}
+		if (i >= 10) {
+			list = rand() % hard.question.size();
+			print_one_question(hard, list);
+		}
 		sound->stop();
 		sound = OpenSound(device, "next.mp3", false);
 		sound->play();
@@ -1160,7 +1307,12 @@ void play(const Phase& ques, const vector <string>& prizes)
 		sound = OpenSound(device, "mind.mp3", false);
 		sound->play();
 		sound->setRepeat(true);
-		choice(ques, list, prizes);
+		if (i >= 0 and i < 5)
+			choice(easy, list, prizes);
+		if (i >= 5 and i < 10)
+			choice(midd, list, prizes);
+		if (i >= 10)
+			choice(hard, list, prizes);
 		cur_prize++;
 		system("pause");
 		fl_stop_life = TRUE;
@@ -1175,11 +1327,10 @@ void play(const Phase& ques, const vector <string>& prizes)
 	sound->play();
 	cout << setw(100) << right << "Поздравляю, вы победили!" << endl;
 	Sleep(5000);
-	millioneer(ques, prizes);
+	millioneer(prizes);
 }
 
-void instruction(const Phase& ques, const vector<string>& prizes)
-{
+void instruction(const vector<string>& prizes) {
 	system("cls");
 	print_logo();
 	cout << endl << endl;
@@ -1192,18 +1343,16 @@ void instruction(const Phase& ques, const vector<string>& prizes)
 	cout << "Для подтверждения ответа необходимо повторно выбрать необходимый ответ" << endl << endl;
 	cout << "\t\t Приятной игры!" << endl << endl;
 	system("pause");
-	menu(ques, prizes);
+	menu(prizes);
 }
 
-void conf_menu(const Phase& ques, const vector <string>& prizes)
-{
-	switch (m_count)
-	{
+void conf_menu(const vector <string>& prizes) {
+	switch (m_count) {
 	case 0:
-		menu_prize(ques, prizes);
+		menu_prize(prizes);
 		break;
 	case 1:
-		instruction(ques, prizes);
+		instruction(prizes);
 		break;
 	case 2:
 		cout << endl << setw(90) << right << "Всего доброго!" << endl;
@@ -1215,60 +1364,53 @@ void conf_menu(const Phase& ques, const vector <string>& prizes)
 	}
 }
 
-void menu_choice(const Phase& ques, const vector <string>& prizes) // в зависимости от стрелок изменяем меню
-{
+void menu_choice(const vector <string>& prizes) {
 	int k1;
 	k1 = _getch(); // получаем символ стрелки без вывода знака
-	if (k1 == 0xE0) // если стрелки
-	{
-		switch (k1)
-		{
+	if (k1 == 0xE0) {
+		switch (k1) {
 		case 0x48: // стрелка вверх
 			m_count--;
 			if (m_count < 0) m_count = 0;
-			menu(ques, prizes);
+			menu(prizes);
 			break;
 
 		case 0x50: // стрелка вниз
 			m_count++;
 			if (m_count > 2) m_count = 2;
-			menu(ques, prizes);
+			menu(prizes);
 			break;
 		case 0xD: // подтвердить
-			conf_menu(ques, prizes);
+			conf_menu(prizes);
 			break;
 		default:
-			menu_choice(ques, prizes);
+			menu_choice(prizes);
 		}
 	}
-	switch (k1)
-	{
+	switch (k1) {
 	case 0x48: // стрелка вверх
 		m_count--;
 		if (m_count < 0) m_count = 0;
-		menu(ques, prizes);
+		menu(prizes);
 		break;
 
 	case 0x50: // стрелка вниз
 		m_count++;
 		if (m_count > 2) m_count = 2;
-		menu(ques, prizes);
+		menu(prizes);
 		break;
 	case 0xD: // подтвердить
-		conf_menu(ques, prizes);
+		conf_menu(prizes);
 		break;
 	default:
-		menu_choice(ques, prizes);
+		menu_choice(prizes);
 	}
 }
 
-void menu(const Phase& ques, const vector <string>& prizes)
-{
-
+void menu(const vector <string>& prizes) {
 	system("cls");
 	print_logo();
-	if (m_count == 0)
-	{
+	if (m_count == 0) {
 		cout << setw(100) << right << "Игра \"Кто хочет стать миллионером?\"" << endl;
 		cout << endl;
 		SetColor(6, 0);
@@ -1276,10 +1418,9 @@ void menu(const Phase& ques, const vector <string>& prizes)
 		SetColor(7, 0);
 		cout << setw(85) << right << "\tИнструкция" << endl;
 		cout << setw(80) << right << "\tВыход" << endl;
-		menu_choice(ques, prizes);
+		menu_choice(prizes);
 	}
-	if (m_count == 1)
-	{
+	if (m_count == 1) {
 		cout << setw(100) << right << "Игра \"Кто хочет стать миллионером?\"" << endl;
 		cout << endl;
 		cout << setw(80) << right << "\tИграть" << endl;
@@ -1287,10 +1428,9 @@ void menu(const Phase& ques, const vector <string>& prizes)
 		cout << setw(85) << right << "\tИнструкция" << endl;
 		SetColor(7, 0);
 		cout << setw(80) << right << "\tВыход" << endl;
-		menu_choice(ques, prizes);
+		menu_choice(prizes);
 	}
-	if (m_count == 2)
-	{
+	if (m_count == 2) {
 		cout << setw(100) << right << "Игра \"Кто хочет стать миллионером?\"" << endl;
 		cout << endl;
 		cout << setw(80) << right << "\tИграть" << endl;
@@ -1298,12 +1438,11 @@ void menu(const Phase& ques, const vector <string>& prizes)
 		SetColor(6, 0);
 		cout << setw(80) << right << "\tВыход" << endl;
 		SetColor(7, 0);
-		menu_choice(ques, prizes);
+		menu_choice(prizes);
 	}
 }
 
-void millioneer(const Phase& ques, const vector <string> &prizes)
-{
+void millioneer(const vector <string> &prizes) {
 	system("cls");
 	sound->stop();
 	sound = OpenSound(device, "intro.mp3", false);
@@ -1315,11 +1454,10 @@ void millioneer(const Phase& ques, const vector <string> &prizes)
 	sound = OpenSound(device, "back.mp3", false); //открываем наш звук
 	sound->play();
 	sound->setRepeat(true);
-	menu(ques, prizes);
+	menu(prizes);
 }
 
-int main()
-{
+int main() {
 	ifstream out;
 	string str;
 
@@ -1328,7 +1466,6 @@ int main()
 	system("mode con cols=300 lines=100");
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++
-	// ВЫВОД ЗВУКА
 
 	if (!device) {
 		cout << "Ошибка открытия AudioDevice. Нажмите любую клавишу для выхода..";
@@ -1342,21 +1479,17 @@ int main()
 	}
 	srand(time(NULL));
 
-	//sound->play(); //проигрываем наш звук
 	// ВОПРОСЫ + РАНДОМАЙЗ
-	Phase easy;
-	ifstream fout;
-	//int list;
-	fout.open("questions.txt");
+	ifstream fout, fout1, fout2;
+	fout.open("easy.txt");
 	set_question(fout, easy);
+	fout1.open("mid.txt");
+	set_question(fout1, midd);
+	fout2.open("hard.txt");
+	set_question(fout2, hard);
 	//print_questions(easy); // выводим все вопросы для проверки
 
-	/*print_logo();
-	cout << setw(100) << right << "Игра \"Кто хочет стать миллионером?\"" << endl;
-	system("pause");*/
-	millioneer(easy, prizes);
-	
-	//sound->stop();
+	millioneer(prizes);
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++
 	return 0;
